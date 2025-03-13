@@ -10,7 +10,7 @@ const axios = require('axios');
 const connectDB = require('./config/db');
 const admin = require('firebase-admin');
 const serviceAccount = require('./config/serviceAccountKey.json');
-const userRoutes = require('./routes/userRoutes'); // Import userRoutes
+const userRoutes = require('./routes/userRoutes'); 
 
 const app = express();
 const server = http.createServer(app);
@@ -26,7 +26,7 @@ const io = new Server(server, {
     origin: 'http://localhost:5173',
     methods: ['GET', 'POST'],
   },
-});
+});    
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
