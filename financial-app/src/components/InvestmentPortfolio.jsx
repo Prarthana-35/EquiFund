@@ -273,4 +273,4 @@ const InvestmentPortfolio = () => {
   );
 };
 
-export default InvestmentPortfolio;
+export default InvestmentPortfolio;     
