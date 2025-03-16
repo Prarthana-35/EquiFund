@@ -1,54 +1,55 @@
-const User = require('../models/userModel');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const { admin, db } = require("../config/firebase-admin"); 
 
 const registerUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, name } = req.body;
 
   try {
-    const existingUser = await User.findOne({ email });
+    const existingUser = await admin.auth().getUserByEmail(email).catch(() => null);
     if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: "User already exists!" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const userRecord = await admin.auth().createUser({ email, password, displayName: name });
+    console.log("Firebase user created:", userRecord.uid);
 
-    const user = new User({ email, password: hashedPassword });
-    await user.save();
-
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '1h',
+    await db.collection("users").doc(userRecord.uid).set({
+      name,
+      email,
+      createdAt: new Date(),
     });
 
-    res.status(201).json({ message: 'User registered successfully', token });
+    res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error registering user:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
 const loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { idToken } = req.body;
+  if (!idToken) return res.status(400).json({ message: "ID token is required" });
 
   try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    console.log("Decoded token:", decodedToken);
+
+    // Retrieve user details from Firestore
+    const userDoc = await db.collection("users").doc(decodedToken.uid).get();
+    if (!userDoc.exists) {
+      return res.status(404).json({ message: "User not found in Firestore" });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
-
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '1h',
+    return res.status(200).json({
+      message: "Login successful",
+      user: {
+        uid: decodedToken.uid,
+        email: userDoc.data().email,
+        name: userDoc.data().name,
+      },
     });
-
-    res.status(200).json({ message: 'Login successful', token });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error verifying token:", err);
+    return res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 

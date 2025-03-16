@@ -4,7 +4,6 @@ const { registerUser, loginUser } = require('../controllers/userController');
 const verifyToken = require('../middleware/verifyToken');
 
 router.post('/register', registerUser);
-
 router.post('/login', loginUser);
 
 router.get('/protected', verifyToken, (req, res) => {
