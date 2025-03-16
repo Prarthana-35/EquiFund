@@ -5,7 +5,6 @@ import InvestmentPortfolio from '../components/InvestmentPortfolio';
 const Investments = () => {
   return (
     <div>
-      <h1>Investments Page</h1>
       <InvestmentPortfolio />
     </div>
   );

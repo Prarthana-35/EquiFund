@@ -4,15 +4,18 @@ import { auth } from "../firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { io } from 'socket.io-client';
 
+// MUI Components
+import { Container, Typography, Grid, Paper, TextField, Button, Card, CardMedia, CardContent, Link } from '@mui/material';
+
 const socket = io('http://localhost:5000');
 
 const Education = () => {
   const [videos, setVideos] = useState([]);
-  const [stemVideos, setStemVideos] = useState([]); 
-  const [query, setQuery] = useState('personal finance'); 
-  const [stemQuery, setStemQuery] = useState('women in STEM'); 
-  const [searchTerm, setSearchTerm] = useState(''); 
-  const [stemSearchTerm, setStemSearchTerm] = useState(''); 
+  const [stemVideos, setStemVideos] = useState([]);
+  const [query, setQuery] = useState('personal finance');
+  const [stemQuery, setStemQuery] = useState('women in STEM');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [stemSearchTerm, setStemSearchTerm] = useState('');
 
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState('');
@@ -20,24 +23,6 @@ const Education = () => {
   const [mentors, setMentors] = useState([]);
   const [message, setMessage] = useState('');
   const [chat, setChat] = useState([]);
-
-  const handleSignIn = async () => {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      setUser(userCredential.user);
-    } catch (error) {
-      console.error('Error signing in:', error);
-    }
-  };
-
-   const handleSignUp = async () => {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      setUser(userCredential.user);
-    } catch (error) {
-      console.error('Error signing up:', error);
-    }
-  };
 
   useEffect(() => {
     if (user) {
@@ -47,24 +32,18 @@ const Education = () => {
     }
   }, [user]);
 
-  const sendMessage = () => {
-    socket.emit('message', { room: 'mentor-room', text: message });
-    setMessage('');
-  };
-
   useEffect(() => {
     socket.on('message', (data) => {
       setChat((prevChat) => [...prevChat, data]);
     });
   }, []);
 
-
   useEffect(() => {
     const fetchVideos = async () => {
-      const API_KEY = 'AIzaSyB_KnCPCMOYAI7sQNKwfoRYRNtAxAKUDH4'; 
+      const API_KEY = import.meta.env.VITE_API_KEY;
       try {
         const response = await axios.get(
-          `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q=${query}&key=${API_KEY}&maxResults=5`
+          `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q=${query}&key=${API_KEY}&maxResults=6`
         );
         setVideos(response.data.items);
       } catch (error) {
@@ -73,14 +52,14 @@ const Education = () => {
     };
 
     fetchVideos();
-  }, [query]); 
+  }, [query]);
 
   useEffect(() => {
     const fetchStemVideos = async () => {
       const API_KEY = import.meta.env.VITE_API_KEY;
       try {
         const response = await axios.get(
-          `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q=${stemQuery}&key=${API_KEY}&maxResults=5`
+          `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q=${stemQuery}&key=${API_KEY}&maxResults=6`
         );
         setStemVideos(response.data.items);
       } catch (error) {
@@ -89,221 +68,131 @@ const Education = () => {
     };
 
     fetchStemVideos();
-  }, [stemQuery]); 
+  }, [stemQuery]);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    setQuery(searchTerm); 
+    setQuery(searchTerm);
+  };
+
+  const handleStemSearch = (e) => {
+    e.preventDefault();
+    setStemQuery(stemSearchTerm);
   };
 
   return (
-    <div className="p-5">
-      <h1 className="text-2xl font-bold mb-4">Financial Education</h1>
-      <p className="mb-4">Learn about budgeting, saving, and investing!</p>
+    <Container maxWidth="lg">
+      {/* Financial Education Section */}
+      <Typography variant="h4" fontWeight="bold" gutterBottom mt={4}>
+        Financial Education
+      </Typography>
+      <Typography variant="body1" color="white" mb={3}>
+        Learn about budgeting, saving, and investing!
+      </Typography>
 
-      <form onSubmit={handleSearch} className="mb-8">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+      {/* Finance Search Bar */}
+      <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+        <TextField
+          fullWidth
+          variant="outlined"
           placeholder="Search for finance videos..."
-          className="border p-2 rounded-l"
-        />
-        <button
-          type="submit"
-          className="bg-blue-500 text-white p-2 rounded-r hover:bg-blue-600"
-        >
-          Search
-        </button>
-      </form>
-
-      <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-        {videos.map((video) => (
-          <div key={video.id.videoId} className="border rounded-lg overflow-hidden shadow-lg">
-            <a
-              href={`https://www.youtube.com/watch?v=${video.id.videoId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img
-                src={video.snippet.thumbnails.medium.url}
-                alt={video.snippet.title}
-                className="w-16 h-16" // Reduced height to h-32
-              />
-              <div className="p-4">
-                <p className="font-semibold">{video.snippet.title}</p>
-                <p className="text-sm text-white-600">{video.snippet.channelTitle}</p>
-              </div>
-            </a>
-          </div>
-        ))}
-      </div>
-
-      <h2 className="text-xl font-semibold mb-2 mt-8">Popular Finance Resources</h2>
-      <ul className="list-disc pl-5">
-        <li>
-          <a
-            href="https://www.investopedia.com/financial-term-dictionary-4769738"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-500 hover:underline"
-          >
-            Investopedia Financial Dictionary
-          </a>
-        </li>
-        <li>
-          <a
-            href="https://www.khanacademy.org/economics-finance-domain"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-500 hover:underline"
-          >
-            Khan Academy Finance Courses
-          </a>
-        </li>
-        <li>
-          <a
-            href="https://www.nerdwallet.com/blog/finance/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-500 hover:underline"
-          >
-            NerdWallet Finance Blog
-          </a>
-        </li>
-      </ul>
-
-      <h1 className="text-2xl font-bold mb-4 mt-8">Women In STEM</h1>
-      <p className="mb-4">Gain resources for tech, science, engineering, and mathematics.</p>
-
-      <form onSubmit={handleSearch} className="mb-8">
-        <input
-          type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search for STEM videos..."
-          className="border p-2 rounded-l"
+          sx={{ backgroundColor: 'white', color: 'black' }}
         />
-        <button
-          type="submit"
-          className="bg-blue-500 text-white p-2 rounded-r hover:bg-blue-600"
-        >
+        <Button type="submit" variant="contained" color="primary">
           Search
-        </button>
+        </Button>
       </form>
 
-      <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {stemVideos.map((video) => (
-          <div key={video.id.videoId} className="border rounded-lg overflow-hidden shadow-lg">
-            <a
-              href={`https://www.youtube.com/watch?v=${video.id.videoId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img
-                src={video.snippet.thumbnails.medium.url}
-                alt={video.snippet.title}
-                className="w-full h-32 object-cover" // Smaller thumbnail
-              />
-              <div className="p-4">
-                <p className="font-semibold">{video.snippet.title}</p>
-                <p className="text-sm text-gray-600">{video.snippet.channelTitle}</p>
-              </div>
-            </a>
-          </div>
+      {/* Finance Videos */}
+      <Grid container spacing={3}>
+        {videos.map((video) => (
+          <Grid item xs={12} sm={6} md={4} key={video.id.videoId}>
+            <Card>
+              <a href={`https://www.youtube.com/watch?v=${video.id.videoId}`} target="_blank" rel="noopener noreferrer">
+                <CardMedia
+                  component="img"
+                  height="180"
+                  image={video.snippet.thumbnails.medium.url}
+                  alt={video.snippet.title}
+                />
+                <CardContent>
+                  <Typography variant="subtitle1" noWrap>
+                    {video.snippet.title}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary" noWrap>
+                    {video.snippet.channelTitle}
+                  </Typography>
+                </CardContent>
+              </a>
+            </Card>
+          </Grid>
         ))}
-      </div>
+      </Grid>
 
-      <h2 className="text-xl font-semibold mb-2 mt-8">Manually Curated Resources</h2>
-      <ul className="list-disc pl-5">
+      {/* Women in STEM Section */}
+      <Typography variant="h5" fontWeight="bold" mt={5} >
+        Women In STEM
+      </Typography>
+      <Typography variant="body1" mb={3} color="white">
+        Gain resources for tech, science, engineering, and mathematics.
+      </Typography>
+
+      {/* STEM Search Bar */}
+      <form onSubmit={handleStemSearch} style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder="Search STEM videos..."
+          value={stemSearchTerm}
+          onChange={(e) => setStemSearchTerm(e.target.value)}
+          sx={{ backgroundColor: 'white', color: 'black' }}
+        />
+        <Button type="submit" variant="contained" color="primary">
+          Search
+        </Button>
+      </form>
+
+      {/* STEM Videos */}
+      <Grid container spacing={3}>
+        {stemVideos.map((video) => (
+          <Grid item xs={12} sm={6} md={4} key={video.id.videoId}>
+            <Card>
+              <a href={`https://www.youtube.com/watch?v=${video.id.videoId}`} target="_blank" rel="noopener noreferrer">
+                <CardMedia
+                  component="img"
+                  height="180"
+                  image={video.snippet.thumbnails.medium.url}
+                  alt={video.snippet.title}
+                />
+                <CardContent>
+                  <Typography variant="subtitle1" noWrap>
+                    {video.snippet.title}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary" noWrap>
+                    {video.snippet.channelTitle}
+                  </Typography>
+                </CardContent>
+              </a>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+
+      {/* Resources */}
+      <Typography variant="h5" fontWeight="bold" mt={5}>
+        Resources
+      </Typography>
+      <ul>
         <li>
-          <a
-            href="https://www.womenintech.org/resources"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-500 hover:underline"
-          >
-            Women in Tech Resources
-          </a>
+          <Link href="https://www.investopedia.com" target="_blank">Investopedia</Link>
         </li>
         <li>
-          <a
-            href="https://www.stemwomen.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-500 hover:underline"
-          >
-            STEM Women
-          </a>
-        </li>
-        <li>
-          <a
-            href="https://www.edx.org/course/subject/science"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-500 hover:underline"
-          >
-            edX Science Courses
-          </a>
+          <Link href="https://www.khanacademy.org" target="_blank">Khan Academy</Link>
         </li>
       </ul>
-
-      <h1 className="text-2xl font-bold mb-4">Connect with Mentors</h1>
-
-      {!user ? (
-        <div>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="border p-2 rounded mb-2"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="border p-2 rounded mb-2"
-          />
-          <button
-            onClick={handleSignUp}
-            className="bg-blue-500 text-white p-2 rounded mr-2"
-          >
-            Sign Up
-          </button>
-          <button
-            onClick={handleSignIn}
-            className="bg-green-500 text-white p-2 rounded"
-          >
-            Sign In
-          </button>
-        </div>
-      ) : (
-        <div>
-          <p>Welcome, {user.email}!</p>
-
-          <h2 className="text-xl font-semibold mb-2">Matched Mentors</h2>
-          <ul>
-            {mentors.map((mentor) => (
-              <li key={mentor.id}>{mentor.name}</li>
-            ))}
-          </ul>
-          <div>
-        {chat.map((msg, index) => (
-          <p key={index}>{msg.text}</p>
-        ))}
-      </div>
-      <input
-        type="text"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Type a message..."
-      />
-      <button onClick={sendMessage}>Send</button>
-        </div>
-      )}
-    </div>
+    </Container>
   );
 };
 
