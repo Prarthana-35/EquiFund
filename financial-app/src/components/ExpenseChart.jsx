@@ -8,14 +8,12 @@ const ExpenseChart = ({ expenses }) => {
   const chartInstance = useRef(null);
 
   useEffect(() => {
+    if (!chartRef.current) return;
     const ctx = chartRef.current.getContext('2d');
 
     const categories = {};
     expenses.forEach((expense) => {
-      if (!categories[expense.category]) {
-        categories[expense.category] = 0;
-      }
-      categories[expense.category] += Number(expense.amount);
+      categories[expense.category] = (categories[expense.category] || 0) + Number(expense.amount);
     });
 
     if (chartInstance.current) {
@@ -23,46 +21,42 @@ const ExpenseChart = ({ expenses }) => {
     }
 
     chartInstance.current = new Chart(ctx, {
-      type: 'bar', 
+      type: 'bar',
       data: {
-        labels: Object.keys(categories), 
+        labels: Object.keys(categories),
         datasets: [
           {
             label: 'Expenses by Category',
-            data: Object.values(categories), 
-            backgroundColor: [
-              '#FF6384',
-              '#36A2EB',
-              '#FFCE56',
-              '#4BC0C0',
-              '#9966FF',
-            ],
-            borderColor: [
-              '#FF6384',
-              '#36A2EB',
-              '#FFCE56',
-              '#4BC0C0',
-              '#9966FF',
-            ],
+            data: Object.values(categories),
+            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+            borderColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
             borderWidth: 1,
           },
         ],
       },
       options: {
+        responsive: true,
+        maintainAspectRatio: false,
         scales: {
-          y: {
-            beginAtZero: true,
+          x: { 
+            ticks: { autoSkip: false }, // Prevents skipping labels
           },
+          y: { beginAtZero: true },
         },
       },
     });
-  }, [expenses]); 
+  }, [expenses]);
 
   return (
-    <div>
-      <canvas ref={chartRef}></canvas>
+    <div style={{
+      display: 'flex', justifyContent: 'center', alignItems: 'center', 
+      width: '100%', height: '400px', overflowX: 'auto' // Enables scrolling if too large
+    }}>
+      <div style={{ width: Math.max(expenses.length * 60, 400), height: '100%' }}>
+        <canvas ref={chartRef}></canvas>
+      </div>
     </div>
   );
-}
+};
 
 export default ExpenseChart;
