@@ -3,5 +3,6 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  assetsInclude: ['**/*.mp4'] // Ensures MP4 files are included
+  assetsInclude: ['**/*.mp4'] 
 });
+   
