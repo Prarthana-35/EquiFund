@@ -71,21 +71,24 @@ const InvestmentPortfolio = () => {
   };
 
   const analyzeInvestment = async () => {
+    if (!ticker) {
+      alert("Please enter a valid ticker symbol.");
+      return;
+    }
     try {
       const response = await axios.post('http://127.0.0.1:5000/analyze', {
         ticker,
         start_date: startDate,
         end_date: endDate,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
-      console.log('Analysis Result:', response.data); // Log the response
       setAnalysisResult(response.data);
     } catch (error) {
-      console.error('Error analyzing investment:', error.response ? error.response.data : error.message);
-      alert('Failed to analyze investment. Check the console for details.');
+      if (error.response && error.response.status === 400) {
+        alert(error.response.data.error); // Display the error message
+      } else {
+        console.error('Error analyzing investment:', error);
+        alert('Failed to analyze investment. Check the console for details.');
+      }
     }
   };
   
@@ -189,8 +192,14 @@ const InvestmentPortfolio = () => {
             <Button onClick={analyzeInvestment} variant="contained" color="primary" fullWidth style={{ marginTop: "10px" }}>
               Analyze
             </Button>
-            {analysisResult && <Typography mt={2}>ROI: {analysisResult.roi.toFixed(2)}%</Typography>}
-          </Grid>
+            {analysisResult && (
+            <div style={{ marginTop: "10px" }}>
+                <Typography>Ticker: {analysisResult.ticker}</Typography>
+                <Typography>ROI: {analysisResult.roi.toFixed(2)}%</Typography>
+                <Typography>Volatility: {analysisResult.volatility.toFixed(4)}</Typography>
+              </div>
+            )}        
+            </Grid>
 
           <Grid item xs={12}>
             <Typography variant="h6">Investment Prediction</Typography>
