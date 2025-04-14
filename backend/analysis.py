@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS  # Import CORS
+from flask_cors import CORS 
 import pandas as pd
 import yfinance as yf
 import numpy as np
@@ -7,19 +7,17 @@ from statsmodels.tsa.arima.model import ARIMA
 from datetime import datetime
 
 app = Flask(__name__)
-# Enable CORS for all routes
 CORS(app, resources={
     r"/analyze": {"origins": "http://localhost:5173", "supports_credentials": True},
     r"/predict": {"origins": "http://localhost:5173", "supports_credentials": True}
 })
 
-# Function to fetch stock data dynamically
 def get_stock_data(stock_name):
     stock = yf.Ticker(stock_name)
     dataset = stock.history(start='2021-01-01')
     if dataset.empty:
         raise ValueError(f"No data found for ticker: {stock_name}")
-    dataset.index = pd.to_datetime(dataset.index)  # Ensure the index is a DatetimeIndex
+    dataset.index = pd.to_datetime(dataset.index) 
     dataset['SMA_20'] = dataset['Close'].rolling(window=20).mean()
     dataset['SMA_10'] = dataset['Close'].rolling(window=10).mean()
     dataset['SMA_5'] = dataset['Close'].rolling(window=5).mean()
@@ -52,11 +50,9 @@ def predict_with_arima(data, days):
     forecast = model_fit.forecast(steps=days)
     return forecast.tolist()
 
-# Analyze endpoint
 @app.route('/analyze', methods=['POST', 'OPTIONS'])
 def analyze():
     if request.method == 'OPTIONS':
-        # Handle preflight request
         return jsonify(), 200
     data = request.get_json()
     ticker = data['ticker']
@@ -80,11 +76,9 @@ def analyze():
         print(f"Error analyzing {ticker}: {str(e)}")  # Log the error
         return jsonify({"error": str(e)}), 400
 
-# Predict endpoint
 @app.route('/predict', methods=['POST', 'OPTIONS'])
 def predict():
     if request.method == 'OPTIONS':
-        # Handle preflight request
         return jsonify(), 200
     data = request.get_json()
     ticker = data['ticker']
@@ -92,7 +86,6 @@ def predict():
     try:
         stock_data = get_stock_data(ticker)
         future_prices = predict_with_arima(stock_data, days)
-        # Log the results
         print(f"Ticker: {ticker}, Future Prices: {future_prices}")
         return jsonify({
             "future_prices": future_prices

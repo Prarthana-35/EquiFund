@@ -1,6 +1,6 @@
-const { admin, db } = require("../config/firebase-admin"); 
+import { admin, db } from "../config/firebase-admin.js";
 
-const registerUser = async (req, res) => {
+export const registerUser = async (req, res) => {
   const { email, password, name } = req.body;
 
   try {
@@ -25,7 +25,7 @@ const registerUser = async (req, res) => {
   }
 };
 
-const loginUser = async (req, res) => {
+export const loginUser = async (req, res) => {
   const { idToken } = req.body;
   if (!idToken) return res.status(400).json({ message: "ID token is required" });
 
@@ -52,5 +52,3 @@ const loginUser = async (req, res) => {
     return res.status(500).json({ message: "Server error", error: err.message });
   }
 };
-
-module.exports = { registerUser, loginUser };

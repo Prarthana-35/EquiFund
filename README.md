@@ -43,11 +43,44 @@ Resources for learning about budgeting, saving, investing, and STEM fields.
 
 🛠️ **Tech Stack**
 
-Component	            Technology
-Frontend	        - React, Material-UI
-Backend	            - Node.js, Express, Socket.IO
-Database	        - Firebase Firestore
-Authentication	    - Firebase Authentication
-Data Fetching	    - yFinance, OpenTrivia API
-Machine Learning	- ARIMA (statsmodels)
-CORS Handling	    - CORS Middleware
+**Component	            Technology**
+
+Frontend	        -  React, Material-UI
+
+Backend	            -  Node.js, Express, Socket.IO, Flask
+
+Database	        -  Firebase, Firestore
+
+Authentication	    -  Firebase Authentication
+
+Data Fetching	    -  yFinance, OpenTrivia API
+
+Machine Learning	-  ARIMA (statsmodels)
+
+CORS Handling	    -  CORS Middleware
+
+
+🚀 **Getting Started**
+Clone the repository:
+
+*bash
+Copy*
+
+git clone https://github.com/your-username/financial-app.git
+cd financial-app
+Install dependencies:
+
+*bash
+Copy*
+
+npm install
+Set up Firebase:
+
+Create a Firebase project and add your configuration in src/firebase.js.
+
+Run the app:
+
+*
+bash
+Copy*
+npm start

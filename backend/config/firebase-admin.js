@@ -1,9 +1,22 @@
-const admin = require('firebase-admin');
-const serviceAccount = require('../config/serviceAccountKey.json'); 
+import admin from 'firebase-admin';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import path from 'path';
+import { dirname } from 'path';
+
+// Get current module path
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load service account
+const serviceAccount = JSON.parse(
+  readFileSync(path.join(__dirname, 'serviceAccountKey.json'))
+);
 
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
+    databaseURL: process.env.FIREBASE_DATABASE_URL
   });
 }
 
@@ -17,24 +30,23 @@ const addUsersToFirestore = async () => {
 
     for (const user of users) {
       const userRef = db.collection('users').doc(user.uid);
-
       const userDoc = await userRef.get();
+      
       if (!userDoc.exists) {
         await userRef.set({
           email: user.email,
-          createdAt: new Date(),
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
         });
         console.log(`User ${user.email} added to Firestore`);
-      } else {
-        console.log(`User ${user.email} already exists in Firestore`);
       }
     }
 
     console.log('All users processed successfully');
+    return { success: true, count: users.length };
   } catch (err) {
     console.error('Error adding users to Firestore:', err);
     throw err;
   }
 };
 
-module.exports = { admin, db, auth, addUsersToFirestore };
+export { admin, db, auth, addUsersToFirestore };

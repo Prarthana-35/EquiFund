@@ -10,32 +10,46 @@ services:
         value: 10000
       - key: NODE_ENV
         value: production
-      # Add other Node.js environment variables here
-      - key: MONGO_URI
-        fromDatabase:
-          name: equifund-db
-          property: connectionString
+      - key: MONGODB_URI
+      - key: JWT_SECRET
+      - key: TWITTER_API_KEY
+      - key: TWITTER_API_SECRET
+      - key: TWITTER_ACCESS_TOKEN
+      - key: TWITTER_ACCESS_SECRET
+      - key: TWITTER_BEARER_TOKEN
 
-  # Flask Backend Service
+  # Flask Backend Service (optimized for your requirements.txt)
   - type: web
     name: equifund-flask-backend
     env: python
     buildCommand: |
-      cd backend/flask-server && 
-      pip install -r requirements.txt
+      python -m pip install --upgrade pip
+      pip install -r backend/requirements.txt
+      pip install gunicorn
     startCommand: |
-      cd backend/flask-server && 
-      gunicorn app:app
+      cd backend && 
+      gunicorn --bind :$PORT --workers 2 --threads 4 --timeout 120 analysis:app
     envVars:
       - key: PORT
         value: 10001
-      # Add other Flask environment variables here
       - key: FLASK_ENV
         value: production
+      - key: MONGODB_URI
+      - key: JWT_SECRET
+      - key: TWITTER_API_KEY
+      - key: TWITTER_API_SECRET
+      - key: TWITTER_ACCESS_TOKEN
+      - key: TWITTER_ACCESS_SECRET
+      - key: TWITTER_BEARER_TOKEN
+      - key: AI_MODELS_PATH
+        value: backend/ai-models
+      - key: KERAS_BACKEND
+        value: tensorflow
+      - key: TF_CPP_MIN_LOG_LEVEL  # Reduce TensorFlow verbosity
+        value: "2"
 
-  # Database Service (if needed)
-  - type: database
-    name: equifund-db
-    plan: free
-    engine: mongodb
-    version: 6.0
+    # Optimizations for ML dependencies
+    disk:
+      name: ai-models-disk
+      mountPath: /opt/render/ai-models
+      sizeGB: 1  # Adjust based on your model sizes
