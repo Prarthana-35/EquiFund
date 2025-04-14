@@ -18,6 +18,7 @@ const Navbar = () => {
             <Link to="/" className="nav-link"><FaHome />Home</Link>
             <Link to="/budgeting" className="nav-link"><FaMoneyBillWave />Budgeting</Link>
             <Link to="/investments" className="nav-link"><FaChartLine />Investments</Link>
+            <Link to="/credit" className="nav-link credit-link"><FaUsers />Credits</Link>
             <Link to="/education" className="nav-link"><FaBookOpen />Education</Link>
             <Link to="/game" className="nav-link game-link"><FaGamepad />Quizzes & Games</Link>
             <Link to="/login" className="nav-link"><FaSignInAlt />Login</Link>

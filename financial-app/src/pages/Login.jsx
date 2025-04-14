@@ -12,6 +12,8 @@ import {
   ThemeProvider,
   createTheme,
 } from "@mui/material";
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { useAuth } from '../context/AuthContext';
 
 // Custom Theme with Dark Background & White Text
 const customTheme = createTheme({
@@ -31,6 +33,7 @@ const customTheme = createTheme({
 });
 
 const Login = ({ onLoginSuccess = () => {} }) => {
+  const { setCurrentUser } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -41,25 +44,44 @@ const Login = ({ onLoginSuccess = () => {} }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setFormData({ ...formData, error: "" });
+  // const handleLogin = async (e) => {
+  //   e.preventDefault();
+  //   setFormData({ ...formData, error: "" });
 
+  //   try {
+  //     const response = await loginUser(formData.email, formData.password);
+
+  //     if (response.message === "Login successful") {
+  //       console.log("Login successful:", response.user);
+  //       onLoginSuccess();
+  //     } else {
+  //       setFormData({ ...formData, error: response.message || "Login failed" });
+  //     }
+  //   } catch (err) {
+  //     console.error("Error logging in:", err);
+  //     setFormData({
+  //       ...formData,
+  //       error: err.message || "An error occurred during login",
+  //     });
+  //   }
+  // };
+  const handleLogin = async (email, password) => {
     try {
-      const response = await loginUser(formData.email, formData.password);
-
-      if (response.message === "Login successful") {
-        console.log("Login successful:", response.user);
-        onLoginSuccess();
-      } else {
-        setFormData({ ...formData, error: response.message || "Login failed" });
-      }
-    } catch (err) {
-      console.error("Error logging in:", err);
-      setFormData({
-        ...formData,
-        error: err.message || "An error occurred during login",
-      });
+      const auth = getAuth();
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      
+      // Get the ID token
+      const token = await user.getIdToken();
+      
+      // Store token in localStorage or context
+      localStorage.setItem('token', token);
+      setCurrentUser(user);
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Login error:', error);
+      return { success: false, error: error.message };
     }
   };
 

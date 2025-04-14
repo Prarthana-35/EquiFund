@@ -136,7 +136,7 @@ const Home = () => {
           className="max-w-2xl mx-auto text-center text-gray-600"
         >
           <p className="mb-6">
-            At <span className="font-bold text-blue-600">[Your Brand Name]</span>, we believe that financial independence is the key to a secure future. Our goal is to provide women with the tools, resources, and guidance needed to manage money confidently, invest wisely, and achieve financial freedom.
+           Through <span className="font-bold text-blue-600">WOMEN EMPOWERMENT</span>, we believe that financial independence is the key to a secure future. Our goal is to provide women with the tools, resources, and guidance needed to manage money confidently, invest wisely, and achieve financial freedom.
           </p>
           <p className="mb-6">
             What We Offer:

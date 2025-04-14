@@ -1,5 +1,5 @@
 import React from 'react';
-import CreditEvaluation from '../components/CreditEvaluation';
+import CreditEvaluation from '../components/CreditEvaluation/CreditEvaluation';
 
 const Credits = () => {
   return (
