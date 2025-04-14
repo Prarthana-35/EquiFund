@@ -1,0 +1,41 @@
+services:
+  # Node.js Backend Service
+  - type: web
+    name: equifund-node-backend
+    env: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && node server.js
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+      # Add other Node.js environment variables here
+      - key: MONGO_URI
+        fromDatabase:
+          name: equifund-db
+          property: connectionString
+
+  # Flask Backend Service
+  - type: web
+    name: equifund-flask-backend
+    env: python
+    buildCommand: |
+      cd backend/flask-server && 
+      pip install -r requirements.txt
+    startCommand: |
+      cd backend/flask-server && 
+      gunicorn app:app
+    envVars:
+      - key: PORT
+        value: 10001
+      # Add other Flask environment variables here
+      - key: FLASK_ENV
+        value: production
+
+  # Database Service (if needed)
+  - type: database
+    name: equifund-db
+    plan: free
+    engine: mongodb
+    version: 6.0
